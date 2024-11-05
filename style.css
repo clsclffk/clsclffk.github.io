@@ -1,0 +1,82 @@
+/* 배경 색상 */
+body {
+    background-color: mistyrose;
+}
+
+/* 헤더 스타일 */
+header h1 {
+    color: darkslategray;
+    text-align: center;
+    padding: 20px 0; /* 패딩 추가 */
+}
+
+/* 이미지 스타일 */
+img {
+    border-radius: 100%; /* 모서리 둥글게 */
+    margin-right: 10px;
+}
+
+/* 섹션 스타일 */
+section {
+    margin: 20px 0; /* 위아래에 여백 추가 */
+    padding: 10px; /* 섹션 내부 패딩 */
+    background-color: lavenderblush; /* 배경색 추가 (선택 사항) */
+    border-radius: 5px; /* 모서리 둥글게 (선택 사항) */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 그림자 추가 (선택 사항) */
+}
+
+
+/* 테이블 스타일 */
+table {
+    width:30%;
+    border-collapse: collapse;  /* 테두리 합치기 */
+}
+
+th, td {
+    padding: 10px;  /* 셀 내부 여백 */
+    text-align: center;
+}
+
+th {
+    background-color: lightcoral;
+    color: white;
+}
+
+td {
+    background-color: seashell;
+}
+
+/* 링크 스타일 */
+a {
+    color: darkblue;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* 네비게이션 메뉴 스타일 */
+nav {
+    margin-bottom: 20px; /* 메뉴와 다른 요소 간의 간격 */
+    text-align: center;
+}
+
+nav ul {
+    list-style-type: none; /* 기본 목록 스타일 제거 */
+    padding: 0; /* 기본 패딩 제거 */
+    display: flex; /* 가로로 정렬 */
+    justify-content: center;
+}
+
+nav li {
+    margin-right: 20px; /* 각 아이템 간격 */
+}
+
+
+/* 푸터 스타일 */
+footer p {
+    text-align: center;
+    font-size: 0.8em;
+    color: gray;
+}
