@@ -100,3 +100,66 @@ footer p {
     font-size: 0.8em;
     color: gray;
 }
+
+/* 다크 모드 스타일 */
+body.dark-mode {
+    background-color: #121212; /* 배경색 어둡게 */
+    color: #e0e0e0; /* 기본 텍스트 색상 밝게 */
+}
+
+header.dark-mode h1 {
+    color: #f5f5f5; /* 헤더 텍스트 밝게 */
+}
+
+section.dark-mode {
+    background-color: #333; /* 섹션 배경 어둡게 */
+    color: #e0e0e0;
+}
+
+table.dark-mode th {
+    background-color: #555; /* 테이블 헤더 배경 어둡게 */
+    color: #f5f5f5;
+}
+
+table.dark-mode td {
+    background-color: #444; /* 테이블 셀 배경 어둡게 */
+}
+
+nav.dark-mode ul li a {
+    color: #bb86fc; /* 다크 모드 링크 색상 */
+}
+
+footer.dark-mode p {
+    color: #999; /* 푸터 텍스트 색상 어둡게 */
+}
+
+#darkModeToggle {
+    position: absolute;
+    top: 20px;
+    right: 20px; /* 버튼을 오른쪽 상단에 위치시킴 */
+    padding: 8px 12px;
+    background-color: #555;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#darkModeToggle:hover {
+    background-color: #777;
+}
+
+/* 서서히 나타나는 애니메이션 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+img {
+    opacity: 0; /* 초기에는 보이지 않도록 설정 */
+    animation: fadeIn 2s ease-in-out forwards; /* 2초 동안 서서히 나타나게 설정 */
+}
