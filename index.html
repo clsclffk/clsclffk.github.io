@@ -9,6 +9,7 @@
 <body>
     <header>
         <h1>Jisu's Homepage</h1>
+        <button id="darkModeToggle">다크모드</button>
     </header>
 
     <nav>
@@ -79,5 +80,26 @@
     <footer>
         <p>&copy; Jisu's Homepage. All rights reserved.</p>
     </footer>
+    
+    <script>
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+    
+        darkModeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            document.querySelectorAll('header, section, table, nav, footer').forEach(el => {
+                el.classList.toggle('dark-mode');
+            });
+    
+            // 다크 모드 여부에 따라 버튼 텍스트 변경
+            if (body.classList.contains('dark-mode')) {
+                darkModeToggle.textContent = '라이트모드';
+            } else {
+                darkModeToggle.textContent = '다크모드';
+            }
+        });
+        
+    </script>
 </body>
 </html>
+    
