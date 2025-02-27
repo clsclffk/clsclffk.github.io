@@ -21,7 +21,6 @@ tagline: 데이터 엔지니어링 디버깅 기록 블로그 # it will display 
 description: >- # used by seo meta and the atom feed
   데이터 엔지니어링 디버깅 기록 블로그
 
-lastmod: false
 
 # Fill in the protocol & hostname for your site.
 # E.g. 'https://username.github.io', note that it does not end with a '/'.
