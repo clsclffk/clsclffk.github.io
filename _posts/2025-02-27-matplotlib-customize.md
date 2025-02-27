@@ -1,6 +1,5 @@
 ---
 title: Matplotlib으로 Radar Chart 커스터마이징 하기
-description: matplotlib, radar chart
 author: jisu
 date: 2025-02-27 11:33:00 +0900
 categories: [visualization]
@@ -152,6 +151,7 @@ plt.show()
 그래프에 한글이 나오게 하려면 한글 폰트를 따로 설치하거나 불러와야 한다.
 폰트 경로를 설정하고 해당 폰트를 matplotlib에 적용해야한다.
 
+## 그리드를 다각형으로 커스터마이징한 코드
 ```python
 import numpy as np
 import matplotlib.pyplot as plt
