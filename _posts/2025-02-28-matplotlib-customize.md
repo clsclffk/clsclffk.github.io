@@ -2,10 +2,10 @@
 title: Matplotlib으로 Radar Chart 커스터마이징 하기
 description: matplotlib, radar chart
 author: jisu
-date: 2025-02-28
+date: 2025-02-28 11:33:00 +0900
 categories: [visualization]
 tags: [matplotlib]
-pin: true
+pin: false
 math: true
 mermaid: true
 ---
