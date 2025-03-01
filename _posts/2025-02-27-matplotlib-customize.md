@@ -146,7 +146,7 @@ ax.set_varlabels(spoke_labels)
 
 plt.show()
 ```
-![그래프](assets/img/posts/다운로드1.png)
+![그래프](/assets/img/posts/다운로드1.png)
 
 위의 베이스 코드를 바탕으로 커스터마이징을 해보았다.
 그리드가 원형임을 확인할 수 있다.
@@ -306,4 +306,4 @@ ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1), title='Legend')
 plt.show()
 ```
 
-![그래프](assets/img/posts/다운로드2.png)
+![그래프](/assets/img/posts/다운로드2.png)
