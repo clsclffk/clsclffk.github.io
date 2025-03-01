@@ -17,7 +17,7 @@ $sidebar-display: 'sidebar-display'; /* the attribute for sidebar display */
   overflow-y: auto;
   width: v.$sidebar-width;
   background: url('/assets/img/sidebar_background.jpg') no-repeat center center;
-  background-size: contain;
+  background-size: cover;
   background-attachment: fixed; 
   border-right: 1px solid var(--sidebar-border-color);
 
