@@ -16,10 +16,10 @@ timezone: Asia/Seoul
 
 title: DE Log # the main title
 
-tagline: 데이터 엔지니어링 디버깅 기록 블로그 # it will display as the subtitle
+tagline: 데이터 엔지니어링 기록 블로그 # it will display as the subtitle
 
 description: >- # used by seo meta and the atom feed
-  데이터 엔지니어링 디버깅 기록 블로그
+  데이터 엔지니어링 기록 블로그
 
 
 # Fill in the protocol & hostname for your site.
