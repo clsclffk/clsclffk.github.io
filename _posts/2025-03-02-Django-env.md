@@ -1,7 +1,7 @@
 ---
 title: AWS EC2환경에 Django 설치하기
 author: jisu
-date: 2025-03-02 11:33:00 +0900
+date: 2025-03-01 11:33:00 +0900
 categories: [AWS]
 tags: [Django]
 pin: false
