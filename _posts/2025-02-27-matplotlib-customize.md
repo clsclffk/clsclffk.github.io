@@ -137,7 +137,7 @@ title, case_data = data[0]
 fig, ax = plt.subplots(figsize=(5, 5), subplot_kw=dict(projection='radar'))
 fig.subplots_adjust(top=0.85, bottom=0.05)
 ax.set_rgrids([0, 1, 2.0, 3.0, 4.0, 5.0, 6])
-ax.set_title(title,  position=(0.5, 1.1), ha='center')
+ax.set_title(title,  position=(0.5, 1.1), ha='center', pad=40)
 
 for d in case_data:
     line = ax.plot(theta, d)
@@ -146,10 +146,13 @@ ax.set_varlabels(spoke_labels)
 
 plt.show()
 ```
+![그래프](assets/img/posts/다운로드1.png)
 
 위의 베이스 코드를 바탕으로 커스터마이징을 해보았다.
+그리드가 원형임을 확인할 수 있다.
 그래프에 한글이 나오게 하려면 한글 폰트를 따로 설치하거나 불러와야 한다.
 폰트 경로를 설정하고 해당 폰트를 matplotlib에 적용해야한다.
+AWS EC2에서 폰트 
 
 ## 그리드를 다각형으로 커스터마이징한 코드
 ```python
@@ -259,17 +262,9 @@ def radar_factory(num_vars, frame='circle'):
     register_projection(RadarAxes)
     return theta
 
-# 한글 폰트 설치
-# !apt-get -qq install -y fonts-nanum
-# 한글 폰트 설정!!!!!!!!!!!!
-# import matplotlib.font_manager as fm
-# font_path = '경로 지정!!!!!!!!!!'
-# font_prop = fm.FontProperties(fname=font_path)
-# font_prop.get_name()
-
 # 데이터 준비
 data = [['O1', 'O2', 'O3', 'O4', 'O5'],
-        ('Title', [
+        ('Comparision', [
                     [4, 3.5, 4, 2, 3,],
                     [1.07, 5.95, 2.04, 1.05, 0.00,],
                   ]
@@ -295,7 +290,7 @@ ax.set_title(title,  position=(0.5, 1.1), ha='center', pad=40)
 colors = ['#FF9999', '#66B2FF']
 
 # 데이터 플로팅
-labels = ['Apple', 'Samsung']
+labels = ['A', 'B']
 for i, d in enumerate(case_data):
     color = colors[i % len(colors)]  # 색상 지정
     label = labels[i]
@@ -310,3 +305,5 @@ ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1), title='Legend')
 
 plt.show()
 ```
+
+![그래프](assets/img/posts/다운로드2.png)
