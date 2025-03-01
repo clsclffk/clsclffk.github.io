@@ -1,3 +1,14 @@
+---
+title: AWS EC2환경에 Django 설치하기
+author: jisu
+date: 2025-03-02 11:33:00 +0900
+categories: [AWS]
+tags: [Django]
+pin: false
+math: true
+mermaid: true
+---
+
 ## AWS EC2 환경에서 Django 설치
 
 일단 가상환경 목록을 조회해보면, 아래와 같다.
