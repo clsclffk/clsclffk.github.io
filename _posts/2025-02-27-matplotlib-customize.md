@@ -148,8 +148,7 @@ plt.show()
 ```
 ![그래프](/assets/img/posts/다운로드1.png)
 
-위의 베이스 코드는 그리드가 원형임을 확인할 수 있다.
-더 나은 시각화를 위해 색상을 조정하고 그리드를 다각형을 바꾸었다.
+위의 베이스 코드를 이용해 색상 조정 및 한글 폰트 적용을 하였다.
 
 ## 한글 폰트 불러오기
 한 가지 유의점은 그래프에 한글이 나오게 하려면 한글 폰트를 불러와야 한다.
@@ -171,7 +170,7 @@ font_path = '/usr/share/fonts/truetype/nanum/NanumGothic.ttf'
 font = fm.FontProperties(fname=font_path).get_name()
 rc('font', family=font)
 ```
-난 이 중에서 나눔 고딕 폰트를 사용하였다.
+나는 이 중에서 나눔 고딕 폰트를 사용하였다.
 이렇게 하면 한글이 깨지지 않고 잘 적용됨을 확인할 수 있다.
 
 ## 그리드를 다각형으로 커스터마이징한 코드
