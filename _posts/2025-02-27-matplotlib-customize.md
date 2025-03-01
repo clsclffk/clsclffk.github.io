@@ -148,11 +148,31 @@ plt.show()
 ```
 ![그래프](/assets/img/posts/다운로드1.png)
 
-위의 베이스 코드를 바탕으로 커스터마이징을 해보았다.
-그리드가 원형임을 확인할 수 있다.
-그래프에 한글이 나오게 하려면 한글 폰트를 따로 설치하거나 불러와야 한다.
+위의 베이스 코드는 그리드가 원형임을 확인할 수 있다.
+더 나은 시각화를 위해 색상을 조정하고 그리드를 다각형을 바꾸었다.
+
+## 한글 폰트 불러오기
+한 가지 유의점은 그래프에 한글이 나오게 하려면 한글 폰트를 불러와야 한다.
 폰트 경로를 설정하고 해당 폰트를 matplotlib에 적용해야한다.
-AWS EC2에서 폰트 
+나는 AWS EC2 환경에서 작업했었는데 아래와 같이 폰트를 적용해주어야 그래프에 한글이 깨지지 않는다.
+
+```python
+import matplotlib.font_manager as fm
+from matplotlib import rc
+
+font_list = fm.findSystemFonts(fontpaths = None, fontext = 'ttf')
+font_list[:]
+```
+이렇게 하면 사용가능한 폰트 목록이 나온다.
+
+```python
+font_path = '/usr/share/fonts/truetype/nanum/NanumGothic.ttf'
+
+font = fm.FontProperties(fname=font_path).get_name()
+rc('font', family=font)
+```
+난 이 중에서 나눔 고딕 폰트를 사용하였다.
+이렇게 하면 한글이 깨지지 않고 잘 적용됨을 확인할 수 있다.
 
 ## 그리드를 다각형으로 커스터마이징한 코드
 ```python
@@ -262,9 +282,10 @@ def radar_factory(num_vars, frame='circle'):
     register_projection(RadarAxes)
     return theta
 
+
 # 데이터 준비
-data = [['O1', 'O2', 'O3', 'O4', 'O5'],
-        ('Comparision', [
+data = [['배터리', '초점', '화질', '렌즈', '용량'],
+        ('사진 촬영', [
                     [4, 3.5, 4, 2, 3,],
                     [1.07, 5.95, 2.04, 1.05, 0.00,],
                   ]
