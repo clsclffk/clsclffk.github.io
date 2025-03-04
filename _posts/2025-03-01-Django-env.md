@@ -1,5 +1,5 @@
 ---
-title: AWS EC2환경에 Django 설치하기
+title: AWS EC2환경에서 Django 시작하기
 author: jisu
 date: 2025-03-01 11:33:00 +0900
 categories: [AWS]
@@ -96,7 +96,20 @@ python -m django --version
 4.2.19 버전으로 설치가 완료되었다.
 
 ## Django 시작하기
+
 장고 설치가 완료되었으면, 프로젝트를 만들고 실행해야한다.
+시작에 앞서 장고 서비스는 크게 이렇게 8단계로 구축이 된다.
+
+### 서비스 구축 순서
+1. 프로젝트 및 앱 생성
+2. settings.py에서 앱 등록
+3. 모델 생성 및 마이그레이션
+4. 관리자 페이지에 모델 등록
+5. URL 설정
+6. 뷰 작성
+7. 템플릿 작성
+8. 정적 파일
+9. 서버 실행
 
 일단 나는 web_project라는 이름의 프로젝트를 만들었다.
 
@@ -187,6 +200,56 @@ Superuser created successfully.
 
 ![image](https://github.com/user-attachments/assets/3778d133-25bf-462e-be91-48bc885e944b)
 
+## 앱 생성 & 등록
+이제 프로젝트 안에 앱을 만들어야 하는데 기능 단위로 앱을 분리하면 된다.
+
+```bash
+cd web_project
+python manage.py startapp users
+```
+
+나는 `users`라는 앱을 하나 만들고 여기에서 사용자 정보를 관리하겠다.
+장고는 `INSTALLED_APPS` 목록에 있는 앱들만 인식하고 사용하기 때문에 `settings.py`에서 `INSTALLED_APPS`에 만든 앱을 추가해야한다.
+
+![image](https://github.com/user-attachments/assets/e2784104-84af-4144-a9cf-eda2229a267d)
+
+### 팁!
+리스트(`[]`), 딕셔너리(`{}`), 튜플(`()`)에서 마지막 요소에 `,`를 붙이는 건 PEP 8 스타일 가이드에서 권장됨!
+
+## 모델 생성 및 마이그레이션
+장고에서 모델은 **DB의 구조를 정의**하는 역할을 한다. 장고에서는 SQL을 직접 사용하지 않고 ORM (Object Relational Mapping) 방식을 사용하여 모델을 정의한다.
+마이그레이션은 **모델에서 정의한 DB 구조를 실제에 적용**하는 과정이다.
+일단 마이그레이션 파일을 생성한다. 아래의 코드를 실행하면 `migrations/`폴더 안에 DB 변경 사항이 담긴 파일이 생성된다.
+
+```bash
+python manage.py makemigrations web_project
+```
+
+그리고 나서 실제 DB에 반영하기 위해 아래의 코드를 실행한다.
+DB에 실제 테이블이 생성된다.
+
+```bash
+python manage.py migrate
+```
+
+## 관리자 페이지에 모델 등록
+장고는 기본적으로 **관리자 페이지를 제공해서 데이터 관리**를 쉽게 할 수 있다.
+`admin.py`에서 모델을 등록하면 데이터를 추가, 수정, 삭제 가능하다.
+
+## urls.py
+URL과 View를 연결하는 파일이 바로 `urls.py`이다.
+프로젝트 전체 URL을 관리하는 `urls.py`에서 앱의 `urls.py`를 연결하고, 앱의 `urls.py`에서 앱 내부 URL을 관리한다.
+
+
+## views.py
+View는 사용자가 **요청한 정보를 처리하고 응답을 반환**하는 역할을 한다.
+
+
+## 템플릿 만들기
+템플릿은 사용자에게 보여질 웹페이지이다.
+
+## 정적 파일 추가
+CSS나 JS 같은 정적 파일 또한 추가 가능하다.
 
 
 
