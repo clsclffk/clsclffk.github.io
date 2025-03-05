@@ -542,13 +542,14 @@ class Users(models.Model):
     gender = models.CharField(max_length=1)
     created_at = models.DateTimeField()
     class Meta:
-        managed = False
+        managed = True
         db_table = 'users'
         unique_together = (('hobby', 'nickname', 'age_group', 'gender'),)
 ```
 
-나는 `managed = False`로 설정했기 때문에 마이그레이션이 필요하지 않고, Django가 직접 테이블을 생성하거나 수정하지 않는다. 대신 기존 MySQL 테이블을 그대로 사용하면서, Django ORM을 통해 데이터를 조회하고 관리할 수 있다.
-따라서 makemigrations와 migrate를 실행할 필요 없이, 바로 Django ORM을 사용하여 데이터 조회 및 삽입 테스트를 진행하면 된다.
+나는 `managed = True`로 설정해서 Admin에서 데이터 관리(추가/수정/삭제)를 할 수 있게 하였다. 이제 장고에서 `models.py`를 수정하면 `makemigrations` & `migrate`를 실행하여 MySQL 테이블도 자동으로 변경될 수 있다.
+
+Django ORM을 사용하여 데이터 조회 및 삽입 테스트를 진행하면 된다.
 
 ```bash
 python manage.py shell
@@ -560,8 +561,6 @@ print(Users.objects.all())
 ```
 
 데이터가 정상적으로 출력이 되면 MySQL과 Django ORM이 잘 연결된 것이다. 
-일단 나는 Django에서 직접 테이블 관리를 하지 않으므로 관리자 페이지에 모델을 등록하지 않았다.
-만약 필요시, `admin.py`에서 모델을 등록하면 데이터를 추가, 수정, 삭제 가능하다.
 
 ## urls.py
 URL과 View를 연결하는 파일이 바로 `urls.py`이다.
