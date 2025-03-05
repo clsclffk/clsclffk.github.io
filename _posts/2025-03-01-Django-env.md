@@ -522,10 +522,10 @@ class AnalysisResults(models.Model):
 - 모델의 순서를 재배열해야 할 수 있음
 - 복합 기본키를 장고가 지원하지 않음
 - ForeignKey와 OneToOneField는 on_delete 속성이 설정되어 있어야 함
-- managed = False로 설정된 라인을 제거하면 Django가 해당 테이블을 생성, 수정, 삭제할 수 있음
+- `managed = False`로 설정된 라인을 제거하면 Django가 해당 테이블을 생성, 수정, 삭제할 수 있음
 이렇게 정리되어 있다.
 이거에 맞게 테이블을 변경해주어야 한다.
-그리고 `models.py`가 각각 앱 안에 들어있어야 하므로 앱 폴더(analysis/, hobbies/, users/)로 이동시켜줘야 한다.
+그리고 `models.py`가 각각 앱 안에 들어있어야 하므로 앱 폴더(`analysis/`, `hobbies/`, `users/`)로 이동시켜줘야 한다.
 각 앱 폴더에 `models.py`를 만들고 각 앱에 맞는 모델을 정의하면 된다.
 `users`앱의 `models.py`에 가서 아래와 같이 모델을 정의하면 된다.
 
