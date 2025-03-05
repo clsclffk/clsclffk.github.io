@@ -218,23 +218,350 @@ python manage.py startapp users
 
 ## 모델 생성 및 마이그레이션
 장고에서 모델은 **DB의 구조를 정의**하는 역할을 한다. 장고에서는 SQL을 직접 사용하지 않고 ORM (Object Relational Mapping) 방식을 사용하여 모델을 정의한다.
-마이그레이션은 **모델에서 정의한 DB 구조를 실제에 적용**하는 과정이다.
-일단 마이그레이션 파일을 생성한다. 아래의 코드를 실행하면 `migrations/`폴더 안에 DB 변경 사항이 담긴 파일이 생성된다.
+
+### MySQL과 Django 연결
+나는 MySQL에 이미 만들어둔 데이터베이스가 있었기 때문에 ORM과 기존의 데이터베이스를 연결하는 방식으로 진행하였다.
+일단 `settings.py`에서 MySQL 연결 설정을 기존 DB에 맞게 수정해야한다.
+
+![image](https://github.com/user-attachments/assets/ddfa6bb1-967a-4775-a498-9333018c592d)
+
+기본적으로 sqlite와 연결되어있고 나는 이걸 MySQL로 바꿔주었다.
 
 ```bash
-python manage.py makemigrations web_project
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'SNS_DB', 
+        'USER': 'lab13',  # MySQL 사용자 계정 (기존 계정 사용 가능)
+        'PASSWORD': 'lab13',  # MySQL 계정 비밀번호
+        'HOST': 'localhost',  # Django와 MySQL이 같은 서버에 있는 경우
+        'PORT': '3306',  # MySQL 기본 포트
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
+    }
+}
 ```
 
-그리고 나서 실제 DB에 반영하기 위해 아래의 코드를 실행한다.
-DB에 실제 테이블이 생성된다.
+장고가 MySQL과 통신하려면 `mysqlclient`라는 패키지가 필요해서 설치해주었다.
 
 ```bash
-python manage.py migrate
+pip install mysqlclient
 ```
 
-## 관리자 페이지에 모델 등록
-장고는 기본적으로 **관리자 페이지를 제공해서 데이터 관리**를 쉽게 할 수 있다.
-`admin.py`에서 모델을 등록하면 데이터를 추가, 수정, 삭제 가능하다.
+그리고 나서 아래의 코드를 통해 장고가 MySQL에 연결이 되는지 확인해본다.
+
+```bash
+python manage.py dbshell
+```
+
+```
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 926
+Server version: 5.7.42-0ubuntu0.18.04.1 (Ubuntu)
+
+Copyright (c) 2000, 2023, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>
+```
+
+이렇게 창이 뜨면 연결에 성공이고, 테이블을 조회하면 내가 만든 테이블들이 나온다.
+장고 ORM을 이용해서 MySQL 데이터를 불러 온 것에 성공하였다.
+
+```sql
+SHOW TABLES;
+```
+
+```
++-----------------------+
+| Tables_in_SNS_DB      |
++-----------------------+
+| analysis_results      |
+| hobby_keywords        |
+| phone_recommendations |
+| tbCrawled_Danawa      |
+| tbCrawled_Youtube     |
+| users                 |
++-----------------------+
+6 rows in set (0.00 sec)
+```
+
+## 모델 등록
+이미 MySQL에 테이블이 있으므로 Django에서 기존 테이블을 자동으로 모델로 변환해야한다.
+그런데 아래의 코드를 실행하면, 
+
+```bash
+python manage.py inspectdb > models.py
+```
+
+```
+raise NotSupportedError(
+django.db.utils.NotSupportedError: MySQL 8 or later is required (found 5.7.42).
+```
+장고가 MySQL 8.0 이상을 요구하는데 현재 버전은 5.7.42 버전이라서 에러가 발생하였다.
+MySQL을 업그레이드 해줘야 문제가 해결된다.
+> 출처 : https://docs.djangoproject.com/en/5.1/ref/databases/#mysql-notes
+
+```bash
+sudo apt-cache policy mysql-server
+```
+```
+mysql-server:
+  Installed: 5.7.42-0ubuntu0.18.04.1
+  Candidate: 5.7.42-0ubuntu0.18.04.1
+  Version table:
+ *** 5.7.42-0ubuntu0.18.04.1 500
+        500 http://ap-northeast-3.ec2.archive.ubuntu.com/ubuntu bionic-updates/main amd64 Packages
+        500 http://security.ubuntu.com/ubuntu bionic-security/main amd64 Packages
+        100 /var/lib/dpkg/status
+     5.7.21-1ubuntu1 500
+        500 http://ap-northeast-3.ec2.archive.ubuntu.com/ubuntu bionic/main amd64 Packages
+```
+MySQL이 업그레이드 가능한지 확인해봤는데, Candidate: 8.0.x가 아니라 5.7.42 그대로 나와서 업그레이드가 불가능한 상태였다.
+
+### MySQL 업그레이드 (5.7 -> 8.0)
+
+일단 MySQL 전체 데이터베이스를 백업했다.
+
+```bash
+mysqldump -u root -p --all-databases > backup_all_databases.sql
+ls -lh backup_all_databases.sql
+```
+
+```
+-rw-r--r-- 1 ubuntu multi 160M Mar  5 11:23 backup_all_databases.sql
+```
+
+이렇게 나오면 정상적으로 백업 파일이 생긴것이다.
+
+MySQL을 업그레이드할 때, 일부 테이블이 호환되지 않을 수도 있어서 MySQL 업그레이드 전에 아래 명령어를 실행하여 모든 테이블의 호환성을 미리 점검하는 것이 중요하다.
+> 출처: https://blog.pages.kr/2921 [pages.kr 날으는물고기 <º))))><:티스토리]
+
+```bash
+mysqlcheck --all-databases --check-upgrade --user=root --password
+```
+업그레이드 전에 현재 실행 중인 MySQL 서비스를 안전하게 중지하기 위해 아래의 명령어를 입력한다.
+
+```
+sudo systemctl stop mysql
+```
+
+MySQL이 정상적으로 중지되었는지 확인하려면 아래 명령어를 실행하면 된다.
+
+```
+systemctl status mysql
+```
+
+MySQL 8.0으로의 업그레이드는 MySQL 5.7의 GA(General Availability) 버전에서만 지원된다. 따라서 5.7.9 이전 버전을 사용 중이라면, 먼저 5.7.9 이상으로 업그레이드한 후 8.0으로 업그레이드 해야한다.
+
+```
+sudo apt update
+sudo apt upgrade mysql-server -y
+mysql --version
+```
+
+5.7이 나오면 일단 1차 업그레이드가 된 것이다.
+
+```
+wget https://dev.mysql.com/get/mysql-apt-config_0.8.22-1_all.deb
+sudo dpkg -i mysql-apt-config_0.8.22-1_all.deb
+```
+
+![image](https://github.com/user-attachments/assets/76e2b43d-d509-4645-acb6-949581113d74)
+이런 화면이 나오는데 MySQL Server & Cluster (Currently selected: mysql-5.7)를 선택한 상태에서 Enter 키를 누른다.
+MySQL 버전 선택 화면이 나타나는데 여기서 mysql-8.0을 선택하고 Enter 키를 누른다.
+
+최신 패키지를 설치하기 위해 먼저 패키지 목록 업데이트를 해야한다.
+```
+sudo apt update
+```
+
+그런데 아래와 같은 에러가 뜬다.
+이 에러는 MySQL 저장소의 GPG 키가 없거나 만료되어 패키지 목록 업데이트가 실패하는 경우 발생한다.
+
+```
+Hit:1 http://ap-northeast-3.ec2.archive.ubuntu.com/ubuntu bionic InRelease
+Hit:2 http://ap-northeast-3.ec2.archive.ubuntu.com/ubuntu bionic-updates InRelease
+Hit:3 http://ap-northeast-3.ec2.archive.ubuntu.com/ubuntu bionic-backports InRelease
+Get:4 https://nvidia.github.io/libnvidia-container/stable/ubuntu18.04/amd64  InRelease [1484 B]
+Get:5 https://nvidia.github.io/nvidia-container-runtime/stable/ubuntu18.04/amd64  InRelease [1481 B]
+Get:6 https://nvidia.github.io/nvidia-docker/ubuntu18.04/amd64  InRelease [1474 B]
+Get:7 http://repo.mysql.com/apt/ubuntu bionic InRelease [20.0 kB]
+Hit:8 https://dl.google.com/linux/chrome/deb stable InRelease
+Err:7 http://repo.mysql.com/apt/ubuntu bionic InRelease
+  The following signatures couldn't be verified because the public key is not available: NO_PUBKEY B7B3B788A8D3785C
+Hit:9 http://ppa.launchpad.net/openjdk-r/ppa/ubuntu bionic InRelease
+Hit:10 http://security.ubuntu.com/ubuntu bionic-security InRelease
+Get:11 https://apt.repos.neuron.amazonaws.com bionic InRelease [1446 B]
+Err:11 https://apt.repos.neuron.amazonaws.com bionic InRelease
+  The following signatures were invalid: EXPKEYSIG 5749CAD8646D9185 Amazon AWS Neuron <neuron-maintainers@amazon.com>
+Reading package lists... Done
+W: GPG error: http://repo.mysql.com/apt/ubuntu bionic InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY B7B3B788A8D3785C
+E: The repository 'http://repo.mysql.com/apt/ubuntu bionic InRelease' is not signed.
+N: Updating from such a repository can't be done securely, and is therefore disabled by default.
+N: See apt-secure(8) manpage for repository creation and user configuration details.
+W: An error occurred during the signature verification. The repository is not updated and the previous index files will be used. GPG error: https://apt.repos.neuron.amazonaws.com bionic InRelease: The following signatures were invalid: EXPKEYSIG 5749CAD8646D9185 Amazon AWS Neuron <neuron-maintainers@amazon.com>
+```
+
+
+패키지 보안 설치를 위해 아래와 같이 GPG 키를 등록해야한다.
+
+```bash
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys B7B3B788A8D3785C
+```
+
+이제 최신 MySQL 서버를 설치하면 된다.
+
+```bash
+sudo apt install mysql-server
+```
+![image](https://github.com/user-attachments/assets/c5a974e2-39a3-453a-a4a7-fae88838bf9b)
+
+기존 데이터를 문제없이 복원할 수 있도록 하려면 "Legacy Authentication Method (Retain MySQL 5.x Compatibility)"를 선택하는 게 안전하다.
+기존 사용자 계정과 연결된 서비스가 문제 없이 로그인되려면 MySQL 5.x 방식(mysql_native_password)이 더 호환성이 높다고해서 설정해줬다.
+
+```bash
+mysql --version
+```
+
+정상적으로 업그레이드가 되었으면 아래와 같이 뜬다.
+
+```
+mysql  Ver 8.0.33 for Linux on x86_64 (MySQL Community Server - GPL)
+```
+
+그런데 또 에러가 뜨는데 MySQL이 정상적으로 설치되었지만 실행은 되지 않는 상황이다.
+
+```bash
+sudo systemctl start mysql
+```
+
+```
+Job for mysql.service failed because the control process exited with error code.
+See "systemctl status mysql.service" and "journalctl -xe" for details.
+```
+
+이 상황을 해결하려면, MySQL 8.0에서는 query_cache_size 및 query_cache_limit가 제거되었으므로, MySQL 설정 파일(/etc/mysql/mysql.conf.d/mysqld.cnf)에서 이 변수를 삭제해야 한다.
+
+```bash
+sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+```
+
+```
+# query_cache_size=16M
+# query_cache_limit=1M
+```
+
+이렇게 주석처리 해주면 된다.
+
+다시 `sudo systemctl start mysql`을 하면 성공적으로 실행이 되는것을 확인할 수 있다.
+
+```bash
+mysql -u root -p
+mysql> SHOW DATABASES;
+```
+
+위의 코드를 실행하면 기존 DB가 그대로 유지되고 있는 것까지 확인이 되었다.
+
+### models.py 생성
+나는 이미 MySQL에 생성된 테이블을 장고 ORM과 연동해야하므로 기본적인 마이그레이션(makemigrations, migrate)을 하는 대신, 기존 테이블을 `models.py`에 자동으로 가져오게 해야한다.
+
+```bash
+cd ~/web_project
+python manage.py inspectdb > models.py
+```
+위의 코드를 실행하면 테이블 구조가 장고의 `models.py`로 자동 변환된다.
+
+```bash
+nano models.py
+```
+
+`models.py`를 확인해보면 클래스가 잘 생성되었음을 확인할 수 있다.
+
+```python
+# This is an auto-generated Django model module.
+# You'll have to do the following manually to clean this up:
+#   * Rearrange models' order
+#   * Make sure each model has one field with primary_key=True
+#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired b$
+#   * Remove `managed = False` lines if you wish to allow Django to create, modify, an$
+# Feel free to rename the models, but don't rename db_table values or field names.
+from django.db import models
+
+class AnalysisResults(models.Model):
+    hobby = models.OneToOneField('HobbyKeywords', models.DO_NOTHING, primary_key=True)$
+    gender = models.CharField(max_length=1)
+    age_group = models.CharField(max_length=3)
+    keyword_list = models.JSONField()
+    freq_samsung = models.JSONField()
+    freq_apple = models.JSONField()
+    related_words_samsung = models.JSONField()
+    related_words_apple = models.JSONField()
+    sentiment_samsung = models.FloatField()
+    sentiment_apple = models.FloatField()
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'analysis_results'
+        unique_together = (('hobby', 'gender', 'age_group'),)
+```
+
+난 MySQL에서 설정한 DB를 그대로 사용할 수 있을줄 알았는데 아니였다.
+주석에 보면,
+- 모델의 순서를 재배열해야 할 수 있음
+- 복합 기본키를 장고가 지원하지 않음
+- ForeignKey와 OneToOneField는 on_delete 속성이 설정되어 있어야 함
+- managed = False로 설정된 라인을 제거하면 Django가 해당 테이블을 생성, 수정, 삭제할 수 있음
+이렇게 정리되어 있다.
+이거에 맞게 테이블을 변경해주어야 한다.
+그리고 `models.py`가 각각 앱 안에 들어있어야 하므로 앱 폴더(analysis/, hobbies/, users/)로 이동시켜줘야 한다.
+각 앱 폴더에 `models.py`를 만들고 각 앱에 맞는 모델을 정의하면 된다.
+`users`앱의 `models.py`에 가서 아래와 같이 모델을 정의하면 된다.
+
+```python
+from django.db import models
+from hobbies.models import HobbyKeywords
+
+# Create your models here.
+class Users(models.Model):
+    user_id = models.AutoField(primary_key=True)
+    hobby = models.ForeignKey('HobbyKeywords', models.CASCADE)
+    nickname = models.CharField(max_length=50)
+    age_group = models.CharField(max_length=3)
+    gender = models.CharField(max_length=1)
+    created_at = models.DateTimeField()
+    class Meta:
+        managed = False
+        db_table = 'users'
+        unique_together = (('hobby', 'nickname', 'age_group', 'gender'),)
+```
+
+나는 `managed = False`로 설정했기 때문에 마이그레이션이 필요하지 않고, Django가 직접 테이블을 생성하거나 수정하지 않는다. 대신 기존 MySQL 테이블을 그대로 사용하면서, Django ORM을 통해 데이터를 조회하고 관리할 수 있다.
+따라서 makemigrations와 migrate를 실행할 필요 없이, 바로 Django ORM을 사용하여 데이터 조회 및 삽입 테스트를 진행하면 된다.
+
+```bash
+python manage.py shell
+```
+
+```python
+from users.models import Users
+print(Users.objects.all())
+```
+
+데이터가 정상적으로 출력이 되면 MySQL과 Django ORM이 잘 연결된 것이다. 
+일단 나는 Django에서 직접 테이블 관리를 하지 않으므로 관리자 페이지에 모델을 등록하지 않았다.
+만약 필요시, `admin.py`에서 모델을 등록하면 데이터를 추가, 수정, 삭제 가능하다.
 
 ## urls.py
 URL과 View를 연결하는 파일이 바로 `urls.py`이다.
