@@ -7,6 +7,7 @@ tags: [matplotlib]
 pin: false
 math: true
 mermaid: true
+comments: true
 ---
 
 ## 기본적인 matplotlib radar chart
