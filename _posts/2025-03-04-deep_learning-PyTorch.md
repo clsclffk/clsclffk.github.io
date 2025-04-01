@@ -7,6 +7,7 @@ tags: [PyTorch]
 pin: false
 math: true
 mermaid: true
+comments: true
 ---
 
 ## AWS EC2환경에서 PyTorch 버전
