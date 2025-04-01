@@ -178,11 +178,9 @@ $sidebar-display: 'sidebar-display'; /* the attribute for sidebar display */
   }
 
   .sidebar-bottom {
-    padding-left: 2rem;
-    padding-right: 1rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
     margin-bottom: 1.5rem;
-    justify-content: center;
-    gap: 1rem;
 
     @include bp.xxxl {
       padding-left: 2.75rem;
@@ -239,7 +237,6 @@ $sidebar-display: 'sidebar-display'; /* the attribute for sidebar display */
     .icon-border {
       @extend %no-cursor;
       @include mx.ml-mr(calc((v.$sb-btn-gap - $btn-border-width) / 2));
-      display: none;
       background-color: var(--sidebar-btn-color);
       content: '';
       width: $btn-border-width;
