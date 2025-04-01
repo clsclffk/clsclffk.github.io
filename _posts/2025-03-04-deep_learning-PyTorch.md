@@ -79,7 +79,7 @@ License: BSD-3
 ```
 
 PyTorch 공식 사이트에서 확인해보니 PyTorch와 CUDA가 버전이 호환되지 않아서 발생하는 문제였다. 
-> 참고 : https://pytorch.org/
+> 참고: [https://pytorch.org](https://pytorch.org)
 
 그래서 다시 PyTorch를 uninstall하고 CUDA와 호환되는 버전으로 재설치하였다.
 
