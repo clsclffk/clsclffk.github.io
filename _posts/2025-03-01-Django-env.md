@@ -7,6 +7,7 @@ tags: [Django]
 pin: false
 math: true
 mermaid: true
+comments: true
 ---
 
 ## AWS EC2 환경에서 Django 설치
