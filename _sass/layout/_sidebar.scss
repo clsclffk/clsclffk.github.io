@@ -239,7 +239,7 @@ $sidebar-display: 'sidebar-display'; /* the attribute for sidebar display */
     .icon-border {
       @extend %no-cursor;
       @include mx.ml-mr(calc((v.$sb-btn-gap - $btn-border-width) / 2));
-
+      display: none;
       background-color: var(--sidebar-btn-color);
       content: '';
       width: $btn-border-width;
