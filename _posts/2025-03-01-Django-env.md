@@ -563,21 +563,6 @@ print(Users.objects.all())
 
 데이터가 정상적으로 출력이 되면 MySQL과 Django ORM이 잘 연결된 것이다. 
 
-## urls.py
-URL과 View를 연결하는 파일이 바로 `urls.py`이다.
-프로젝트 전체 URL을 관리하는 `urls.py`에서 앱의 `urls.py`를 연결하고, 앱의 `urls.py`에서 앱 내부 URL을 관리한다.
-
-
-## views.py
-View는 사용자가 **요청한 정보를 처리하고 응답을 반환**하는 역할을 한다.
-
-
-## 템플릿 만들기
-템플릿은 사용자에게 보여질 웹페이지이다.
-
-## 정적 파일 추가
-CSS나 JS 같은 정적 파일 또한 추가 가능하다.
-
 
 
 
