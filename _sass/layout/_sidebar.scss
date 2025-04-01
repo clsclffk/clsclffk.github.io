@@ -178,8 +178,8 @@ $sidebar-display: 'sidebar-display'; /* the attribute for sidebar display */
   }
 
   .sidebar-bottom {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding-left: 0rem;
+    padding-right: 1rem;
     margin-bottom: 1.5rem;
 
     @include bp.xxxl {
