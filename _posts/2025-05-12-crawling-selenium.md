@@ -13,7 +13,7 @@ comments: true
 ## Wikipedia 크롤링, 왜 requests는 안 되고 Selenium은 될까?
 Wikipedia에서 공항 IATA 코드 표 데이터를 크롤링하려 했다. 처음에는 당연히 requests와 BeautifulSoup을 이용해 간단히 HTML에서 표를 추출하면 될 것이라고 생각했다.
 실제로 페이지를 열어보면 정적 테이블 구조가 눈에 띄기 때문이다.
-하지만 예상과 다르게, requests로 페이지를 요청하고 .find("table")을 사용해도 테이블이 전혀 나타나지 않았다.
+하지만 예상과 다르게, requests로 페이지를 요청하고 `.find("table")`을 사용해도 테이블이 전혀 나타나지 않았다.
 처음엔 개발자도구를 잘못 확인했나 싶어서 여러 번 확인해봤지만 잘못된 건 없었다.
 
 ### 🚨 문제 원인 : User-Agent
@@ -22,7 +22,7 @@ Wikipedia는 자동화된 비정상 요청을 감지할 경우, 일반 브라우
 
 일반적인 requests 요청은 다음과 같이 브라우저 정보가 생략되어 있다.
 
-res = requests.get(url)
+`res = requests.get(url)`
 
 이를 방지하기 위해 User-Agent를 브라우저처럼 설정했다.
 
@@ -40,7 +40,7 @@ res = requests.get(url, headers=headers)
 하지만 이렇게 해도 문제는 해결되지 않았다. Wikipedia는 여전히 비브라우저 요청을 차단하고 있었다.
 
 #### User-Agent란?
-**User-Agent**는 브라우저나 프로그램이 웹 서버에 요청을 보낼 때 자신의 정체를 밝히는 헤더다.  
+**User-Agent**는 브라우저나 프로그램이 웹 서버에 요청을 보낼 때 자신의 정체를 밝히는 헤더이다.  
 웹 서버는 이 정보를 통해 요청이 크롬 브라우저에서 온 것인지, 모바일인지, 아니면 자동화된 봇인지 판단한다.  
 많은 웹사이트는 봇처럼 보이는 요청에 대해 데이터를 축소하거나 차단하기 때문에, 크롤링할 때는 이 User-Agent 설정이 매우 중요하다.
 
@@ -105,4 +105,6 @@ df.to_csv("airports.csv", index=False)
 print("전체 크롤링 완료")
 ```
 이렇게 하면 csv파일이 잘 저장됨을 확인할 수 있다.
+![image](https://github.com/user-attachments/assets/10e38e01-b318-4b5f-8a56-8fdd3a909f1b)
+
 
