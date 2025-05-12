@@ -2,7 +2,7 @@
 title: PyTorch CUDA 드라이버 버전 불일치 해결법
 author: jisu
 date: 2025-03-04 11:13:00 +0900
-categories: [deep_learning]
+categories: [Deep Learning]
 tags: [PyTorch]
 pin: false
 math: true
