@@ -142,8 +142,11 @@ EC2 인스턴스를 만들 때 보안 그룹에서 SSH(22번 포트) 접속을 *
 
 ![image](https://github.com/user-attachments/assets/1ada1ce0-102e-41d3-a0ae-4d500f15a7a2)
 
-
-
+### 탄력적 IP(Elastic IP) 설정하기
+이전 문제를 해결했지만, EC2 인스턴스를 껐다 켜면 매번 IP가 바뀌어 Putty 접속이 번거로웠다. 이를 해결하기 위해 Elastic IP를 설정했다.
+보안그룹의 탄력적 IP로 이동해서 Elastic IP를 할당받고 인스턴스와 연결하면 된다.
+EC2 대시보드에서 Public IPv4 address가 고정된 Elastic IP로 표시되며 이제 재시작해도 IP가 변경되지 않는다!
+Putty도 역시 Host Name 에 새로 할당된 Elastic IP로 바꿔줘야 한다.
 
 
 
