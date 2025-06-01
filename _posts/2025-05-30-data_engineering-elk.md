@@ -1,5 +1,5 @@
 ---
-title: Docker로 ELK 스택 로컬 설치 및 Logstash로 데이터 적재
+title: Docker로 로컬 ELK 스택 구축 및 Kibana 데이터 연결하기
 author: jisu
 date: 2025-05-30 11:33:00 +0900
 categories: [Data Engineering]
@@ -10,16 +10,16 @@ mermaid: true
 comments: true
 ---
 
-## 실습 : ELK 스택을 활용한 대용량 CSV 데이터 분석
+## 실습 : ELK 스택을 활용한 실시간 도시데이터 분석
 
 ### 데이터셋 설명
-공공 데이터 포털에서 제공하는 2023년 서울교통공사_역별 일별 시간대별 승하차인원 정보 데이터셋을 이용해,
+서울시에서 제공하는 **실시간 도시데이터 API**를 이용해,
 ELK 스택을 활용해 데이터 분석 및 시각화를 해보려고 한다.
-이 데이터는 시간대별, 역별, 승하차 구분별로 약 19만 건에 달하는 데이터이다.
-단순히 CSV 파일을 Pandas로 분석하는 것도 가능하지만,
+이 데이터는 서울시 전역의 상권 소비 정보와 공영주차장 상태 정보를 포함한 실시간 정보다.
+단순히 JSON 데이터를 Pandas로 분석하는 것도 가능하지만,
 ELK 스택을 실습해보고 싶어서 이 데이터셋을 선택했다.
 
-물론, ELK 스택은 원래 로그 데이터 분석에 많이 쓰인다.  
+물론, ELK 스택은 원래 로그 데이터 분석에 많이 쓰인다.
 그 이유는, ELK는
 
 - **Elasticsearch**를 통해 대용량 데이터를 빠르게 검색하고,
@@ -27,32 +27,33 @@ ELK 스택을 실습해보고 싶어서 이 데이터셋을 선택했다.
 - **Kibana**에서 실시간으로 시각화할 수 있어,
 로그 모니터링 및 검색에 최적화된 구조이기 때문이다.
 
-하지만 로그 데이터 대신 CSV 데이터를 선택한 이유는:
+하지만 로그 데이터 대신 실시간 api를 통해 불러온 JSON 데이터를 선택한 이유는:
 
 - 로그 데이터는 직접 생성하거나 실습용으로 구하기 어려운 반면,
-- 공공 데이터 포털의 CSV 데이터는 누구나 쉽게 구할 수 있고,  
-- 시간대별, 역별, 승하차 구분 등 로그 데이터와 유사한 다차원 필터링 및 집계 구조를 가지고 있어,  
+- 서울시의 실시간 도시데이터는 누구나 쉽게 접근 가능하고,
+- 시간 기반의 업데이트 및 다양한 업종/시설/상황 정보를 포함하고 있어,
 ELK 스택의 분석 기능을 실습하기에 적합하다고 판단했기 때문이다.
 
 즉, 이 데이터셋은 로그와 비슷하게
 
-- 시간(time)이라는 축을 기반으로 필터링할 수 있고,  
-- 다양한 카테고리(역별, 호선별, 승하차 구분별)로 집계가 가능하다.
-> 데이터 출처 : [서울교통공사_역별 일별 시간대별 승하차인원 정보](https://www.data.go.kr/data/15048032/fileData.do)
+- 10분 단위로 갱신되는 timestamp를 기준으로 시간 축 기반 필터링이 가능하고,
+- 다양한 카테고리(업종, 주차장 등)로 집계가 가능하다.
+  
+> 데이터 출처 : [서울시 실시간 도시데이터]([https://www.data.go.kr/data/15048032/fileData.do](https://data.seoul.go.kr/dataList/OA-21285/F/1/datasetView.do))
 
 ### 진행 흐름
 
 전반적인 흐름은 다음과 같다.
 
 ```
-CSV 데이터 (서울교통공사_지하철 데이터)
-  ↓ (읽어오기 + 가공)
-Logstash (logstash.conf 작성, CSV 컬럼 파싱 및 타입 변환, 날짜 필드 처리)
+서울시 실시간 도시데이터 API (상권 소비 + 공영주차장)
+  ↓ (주기적 수집 + JSONL 형식 저장)
+Logstash (logstash.conf 작성, JSON 파싱 및 timestamp 처리)
   ↓ (Elasticsearch에 저장, 검색/집계 처리)
 Elasticsearch (데이터 저장소 역할)
   ↓ (검색/집계 결과 요청)
-Kibana (Data View 생성, Discover에서 데이터 조회, 시간 필터 조정)
-  → 대시보드/시각화로 보여줌 (시간대별/역별/호선별 혼잡도 분석 예정)
+Kibana (Data View 생성, Discover에서 실시간 데이터 조회 및 시간 필터 적용)
+  → 대시보드/시각화로 확장 예정
 ```
 
 
@@ -60,7 +61,7 @@ Kibana (Data View 생성, Discover에서 데이터 조회, 시간 필터 조정)
 ELK 스택을 설치하기 위해 Docker를 사용했다.
 Docker를 쓰면, 로컬 환경에서도 복잡한 설치 없이 간단하게 ELK를 실행할 수 있다.
 
-ELK 스택은 이미 GitHub에 유명한 docker-compose.yml 저장소들이 많이 올라와 있다.
+ELK 스택은 이미 GitHub에 유명한 `docker-compose.yml` 저장소들이 많이 올라와 있다.
 `git clone`만 해도 바로 실행 가능한 코드와 설정들이 준비되어 빠르고 간편하다.
 
 그런데 나는 이 방식 대신 설정을 직접 해보기로 했다.
@@ -119,83 +120,40 @@ volumes:
 ```
 
 ### Logstash 파이프라인 설정
-Logstash는 CSV 데이터를 읽어와 Elasticsearch로 전송하는 역할을 한다.
+Logstash는 JSON 데이터를 읽어와 Elasticsearch로 전송하는 역할을 한다.
 
 이를 위해 반드시 `logstash/pipeline/logstash.conf` 파일이 필요하다.
 
-`logstash.conf`에는
-
-- CSV 파일의 위치 (input),
-
-- CSV 컬럼 파싱 방법 (filter),
-
-- 데이터 전송 대상 (output)을 설정한다.
-
-예를 들어, `logstash.conf`는 다음과 같이 작성할 수 있다.
-
 ```python
-# Logstash 파이프라인 설정 파일
-# CSV 데이터를 읽어서 Elasticsearch로 전송하는 역할
-
 input {
   file {
-    path => "/usr/share/logstash/data/subway_data.csv"  # Logstash 컨테이너 안에 있는 CSV 파일 경로
-    start_position => "beginning"                       # 파일의 맨 처음부터 읽기 (최초 실행 시)
-    sincedb_path => "/dev/null"                          # 파일 읽기 기록 저장 안 함 (매번 처음부터 읽게 함)
+    path => "/usr/share/logstash/data/final_data_kst.jsonl"
+    start_position => "beginning"
+    sincedb_path => "/dev/null"
+    codec => "json"
   }
 }
 
 filter {
-  csv {
-    separator => ","                                     # CSV 구분자 (콤마)
-    columns => [                                         # CSV 파일의 헤더(열 이름) 지정
-      "연번", "수송일자", "호선", "역번호", "역명", "승하차구분",
-      "06시이전", "06-07시간대", "07-08시간대", "08-09시간대", "09-10시간대",
-      "10-11시간대", "11-12시간대", "12-13시간대", "13-14시간대", "14-15시간대",
-      "15-16시간대", "16-17시간대", "17-18시간대", "18-19시간대", "19-20시간대",
-      "20-21시간대", "21-22시간대", "22-23시간대", "23-24시간대", "24시이후"
-    ]
+  date {
+    match => ["timestamp", "ISO8601"]
+    target => "@timestamp"
+    timezone => "Asia/Seoul"
   }
 
-  mutate {                                               # 데이터 타입 변환 (문자열 → 숫자)
-    convert => { "연번" => "integer" }
-    convert => { "역번호" => "integer" }
-    convert => { "06시이전" => "integer" }
-    convert => { "06-07시간대" => "integer" }
-    convert => { "07-08시간대" => "integer" }
-    convert => { "08-09시간대" => "integer" }
-    convert => { "09-10시간대" => "integer" }
-    convert => { "10-11시간대" => "integer" }
-    convert => { "11-12시간대" => "integer" }
-    convert => { "12-13시간대" => "integer" }
-    convert => { "13-14시간대" => "integer" }
-    convert => { "14-15시간대" => "integer" }
-    convert => { "15-16시간대" => "integer" }
-    convert => { "16-17시간대" => "integer" }
-    convert => { "17-18시간대" => "integer" }
-    convert => { "18-19시간대" => "integer" }
-    convert => { "19-20시간대" => "integer" }
-    convert => { "20-21시간대" => "integer" }
-    convert => { "21-22시간대" => "integer" }
-    convert => { "22-23시간대" => "integer" }
-    convert => { "23-24시간대" => "integer" }
-    convert => { "24시이후" => "integer" }
-  }
-
-  date {                                                # 날짜 타입 필드 변환 (문자열 → 날짜)
-    match => ["수송일자", "yyyy-MM-dd"]                  # '수송일자' 컬럼의 날짜 형식 지정 (연-월-일)
-    target => "수송일자"                                 # 변환된 날짜를 저장할 필드 (원본 필드에 덮어쓰기)
-  }
 }
 
 output {
-  elasticsearch {                                       # Elasticsearch로 데이터 전송 설정
-    hosts => ["http://elasticsearch:9200"]              # Elasticsearch 서버 주소 (도커 환경에서 컨테이너 이름으로 접근)
-    index => "subway-data"                              # 데이터를 저장할 Elasticsearch 인덱스 이름
+  elasticsearch {
+    hosts => ["http://elasticsearch:9200"]
+    index => "parking_status"
   }
 
-  stdout { codec => rubydebug }                         # 로그를 콘솔에 출력 (디버깅용)
+  stdout {
+    codec => rubydebug
+  }
 }
+
 ```
 
 ### ELK Stack 실행해보기
@@ -223,75 +181,108 @@ CONTAINER ID   IMAGE                                                 COMMAND    
 
 elasticsearch, logstash, kibana 컨테이너가 모두 실행 중인 것을 확인할 수 있다.
 
-### Logstash 컨테이너: CSV 파일 적재 및 종료
-Logstash는 컨테이너 내부의 /usr/share/logstash/data/ 경로에서 CSV 파일을 읽어온다.
-따라서, 로컬의 log_analysis/data/subway_data.csv 파일을 Logstash 컨테이너 내부로 복사해줘야 한다.
+### 🚨 발생한 문제 : `_jsonparsefailure`
+Logstash 로그를 확인하자마자 다음과 같은 에러가 출력되었다:
 
 ```bash
-docker cp ./data/subway_data.csv logstash:/usr/share/logstash/data/subway_data.csv
+"tags" => [ "_jsonparsefailure" ]
 ```
 
-그런데 컨테이너가 꺼졌다는 에러가 뜬다.
+이 에러의 원인은 데이터 형식 때문이다.
+Logstash의 file input 플러그인은 파일을 한 줄씩 읽으며, 각 줄을 독립적인 JSON 객체로 간주한다.
+그런데 수집된 데이터가 JSON 배열 형태로 저장되어 있으면, Logstash는 이를 한 번에 읽지 못하고
+중간에 잘린 상태의 줄을 읽게 되어 JSON 파싱에 실패한다.
+예를 들어, 아래와 같이 줄바꿈과 들여쓰기가 포함된 배열 형태는 Logstash에서 문제가 발생한다:
+
+```json
+[
+  {
+    "timestamp": "2025-06-01T15:00:00",
+    "area": "강남역",
+    ...
+  },
+  {
+    "timestamp": "2025-06-01T15:10:00",
+    "area": "신촌",
+    ...
+  }
+]
+```
+
+이런 구조는 Logstash가 처리할 수 없어 `_jsonparsefailure` 태그가 붙는다.
+
+### 💡 해결법 : JSONL 포맷 사용
+Logstash에서는 아래와 같은 JSON Lines (.jsonl) 형식으로 저장해야 정상적으로 파싱할 수 있다:
+
+```json
+{"timestamp": "2025-06-01T15:00:00", "area": "강남역", ...}
+{"timestamp": "2025-06-01T15:10:00", "area": "신촌", ...}
+```
+
+즉, 한 줄에 하나의 JSON 객체만 있어야 하며, 줄바꿈 없이 저장되어야 한다.
+이후 파일 형식을 `.jsonl`로 저장하고 `codec => json` 설정을 유지한 상태에서
+Logstash를 재실행하면 정상적으로 적재된다.
+
+#### ⚠ Logstash는 같은 파일을 한 번만 읽는다!
+Logstash는 입력 파일의 경로 + inode 정보를 내부적으로 기억하기 때문에
+내용이 바뀌더라도 파일명이 같으면 다시 읽지 않을 수 있다.
+
+비록 sincedb_path => "/dev/null" 옵션으로 처음부터 읽게 설정하더라도,
+파일명이 그대로면 여전히 캐시된 정보로 인해 무시될 수 있다.
+
+해결 방법은 파일명을 바꿔주고, Logstash 설정 파일(logstash.conf)의 경로도 함께 수정한 다음, 컨테이너를 재시작하는 것이다.
 
 ```bash
-docker exec -it logstash ls /usr/share/logstash/data/
-Error response from daemon: container 9e5cf999a4c8fa168e9533c57bb6066985fffe532548407b7b6a690972a2a3eb is not running
+mv final_data.jsonl final_data_kst.jsonl        # 파일명 변경
+# logstash.conf 내 path 경로도 함께 수정
+docker restart logstash                         # Logstash 재시작
 ```
 
-Logstash는 file input 플러그인으로 CSV를 읽고,
-
-데이터를 다 처리한 후에는 더 이상 할 일이 없으니까 컨테이너가 종료된다.
-
-sincedb_path => "/dev/null" 옵션 덕분에 파일을 매번 처음부터 읽지만, 파일을 다 처리하면 종료되는 게 기본 동작이다.
-
-파일을 다시 읽어들이려면 Logstash 컨테이너를 다시 실행해야 한다.
-
-```bash
-docker compose up -d logstash
-```
-
-성공하면 아래처럼 메시지가 출력된다.
-
-```bash
-Successfully copied 24.9MB to logstash:/usr/share/logstash/data/subway_data.csv
-```
-
-### Elasticsearch에 데이터가 잘 들어갔는지 확인
-
-브라우저에서 아래 URL에 접속했을 때, JSON 형태의 데이터가 나오면 성공적으로 적재된 것이다.
-
-```
-http://localhost:9200/subway-data/_search?size=5
-```
+이 과정을 거치면 Logstash는 해당 파일을 새로운 파일로 인식하여 다시 처음부터 읽게 된다.
+**Logstash는 자동으로 재적재하지 않기 때문에, 파일명 변경 + 컨테이너 재시작은 필수이다!**
 
 ### Kibana에서 인덱스 패턴 (Data View) 생성
 ELK 스택에 데이터가 잘 들어갔다면,
 Kibana에서 데이터를 확인하기 위해 인덱스 패턴(Data View) 을 생성해야 한다.
 
-http://localhost:5601 로 Kibana에 접속하고 `Create data view`를 클릭한다.
+`http://localhost:5601` 로 Kibana에 접속한 뒤
+왼쪽 사이드바 메뉴에서 "Discover" → "Create data view" 를 클릭한다.
 
-![image](https://github.com/user-attachments/assets/c68a6fdd-3702-44c3-b2b9-facd1c6bc197)
-
-
-Data View의 이름을 `subway-data`로 지어주고 인덱스 패턴 역시 같게 하면 Elasticsearch 인덱스와 연결이 된다.
-
-![image](https://github.com/user-attachments/assets/2551580a-ebd1-47b5-a1bd-3f5324a85d77)
+![image](https://github.com/user-attachments/assets/9efd1c94-1dae-45e2-a364-58dc612fdade)
 
 
-데이터셋의 날짜 열인 수송일자 컬럼을 Time field로 설정한다.
-이게 Kibana의 시간 필터 기준이 된다.
+Data View 이름은 예를 들어 parking_status로 지어주고,
+인덱스 패턴도 동일하게 parking_status로 설정한다.
+이렇게 하면 Elasticsearch 인덱스와 연결된다.
 
-#### 🚨 Kibana에서 데이터가 안 보이는 이유 : Time field 설정 문제 해결하기
-만약 수송일자가 보이지 않는다면:
+![image](https://github.com/user-attachments/assets/87cbaadb-d0c6-4cf7-8f84-e3d871007f59)
 
-Logstash 설정에서 date 필터가 잘 적용되었는지 확인해야한다.
 
-수송일자 필드가 @timestamp처럼 날짜 필드로 인식되지 않으면 시간 필터가 적용되지 않는다.
-Data View가 생성되면, Discover 화면에서 데이터 조회 가능하다.
+### ⭐ Time field 설정 (`@timestamp`)
+Data View를 만들 때 Time field를 선택하라는 옵션이 나온다.
+이 필드는 Kibana의 시간 기반 필터링, 시각화, 정렬 등의 기준이 된다.
 
-하지만 처음에는 Kibana의 시간 필터가 현재 날짜 기준으로 되어 있어 데이터가 안 보일 수 있다.
-이럴때는 시간 필터를 데이터에 맞게 변경해주면 아래와 같이 데이터가 보인다.
+나는 Logstash 설정에서 timestamp 필드를 ISO8601 형식으로 파싱하여
+Elasticsearch가 이해할 수 있는 표준 시간 필드인 @timestamp로 변환했다.
+따라서 반드시 @timestamp 필드를 Time field로 지정해야 한다.
 
-![image](https://github.com/user-attachments/assets/9e41609b-6d53-4d4f-a33f-19957739b61a)
+또한, Kibana는 기본적으로 UTC(세계 표준시) 를 기준으로 시간 데이터를 해석하기 때문에
+Logstash에서 timezone => "Asia/Seoul"을 명시해 한국 시간(KST)으로 변환해주는 것이 중요하다.
+
+이 설정이 없으면 Kibana에 표시되는 시간과 실제 수집 시각이 어긋나
+데이터가 보이지 않거나 시간 필터가 이상하게 작동할 수 있다.
+
+```conf
+filter {
+  date {
+    match => ["timestamp", "ISO8601"]
+    target => "@timestamp"
+    timezone => "Asia/Seoul"
+  }
+}
+```
+
+이 설정이 제대로 되어 있다면, Kibana에서도 @timestamp 필드를 자동 인식할 수 있다.
+
 
 
