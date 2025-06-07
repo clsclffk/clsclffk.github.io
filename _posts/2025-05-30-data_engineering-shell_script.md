@@ -160,7 +160,7 @@ $VENV_PYTHON 변수에 경로만 정확하게 지정해주면, 이후 실행되�
 cat logs/cron.log
 ```
 
-```plain text
+```
 === Run start: Sun Jun  8 02:30:01 KST 2025 ===
 [SUCCESS] parking_data 업로드 완료 (Sun Jun  8 02:30:17 KST 2025)
 [SUCCESS] commercial_data 업로드 완료 (Sun Jun  8 02:31:28 KST 2025)
@@ -175,7 +175,7 @@ cat logs/cron.log
 curl -X GET localhost:9200/_cat/indices?v
 ```
 
-```plain text
+```
 health status index                       uuid                   pri rep docs.count docs.deleted store.size pri.store.size
 yellow open   seoul_commercial_categories BUnfJLmDT0K-dNvj-QdPDg   1   1       2567          504    469.2kb        469.2kb
 yellow open   seoul_commercial            XaDWDfwWRYapWGRwlyrI5g   1   1        820            0    346.8kb        346.8kb
