@@ -31,7 +31,6 @@ python3 /mnt/c/.../upload_parking_data.py >> ~/log_analysis/logs/parking.log 2>&
 python3 /mnt/c/.../upload_commercial_data.py >> ~/log_analysis/logs/commercial.log 2>&1
 
 echo "=== Run end: $(date) ===" >> ~/log_analysis/logs/cron.log
-
 ```
 
 - 맨 처음에 가상환경을 `source venv/bin/activate`로 활성화한 뒤,
@@ -72,7 +71,6 @@ pandas도 잘 불러오고, 수집된 데이터도 Elasticsearch에 문제 없�
 
 ```bash
 ModuleNotFoundError: No module named 'pandas'
-
 ```
 
 ## 원인 분석
@@ -143,7 +141,6 @@ $VENV_PYTHON /mnt/c/.../upload_parking_data.py >> ~/log_analysis/logs/parking.lo
 $VENV_PYTHON /mnt/c/.../upload_commercial_data.py >> ~/log_analysis/logs/commercial.log 2>&1
 
 echo "=== Run end: $(date) ===" >> ~/log_analysis/logs/cron.log
-
 ```
 
 이 방식은 source로 환경을 적용할 필요 없이,
