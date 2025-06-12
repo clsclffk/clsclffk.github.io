@@ -144,6 +144,31 @@ CONTAINER ID   IMAGE                                                 COMMAND    
 
 elasticsearch, kibana 컨테이너가 모두 실행 중인 것을 확인할 수 있다.
 
+### 🚨 버전 호환 이슈: Elasticsearch 8.x vs Python 클라이언트 9.x
+Docker로 설치한 Elasticsearch는 기본적으로 8.8.0 버전인데,  
+`pip install elasticsearch`로 설치한 Python 클라이언트는 9.x가 설치되어 **호환 오류**가 발생했다.
+
+```
+raise HTTP_EXCEPTIONS.get(meta.status, ApiError)(
+elasticsearch.BadRequestError: BadRequestError(400, 'media_type_header_exception', 'Invalid media-type value on headers [Content-Type, Accept]',
+Accept version must be either version 8 or 7, but 
+found 9. Accept=application/vnd.elasticsearch+json; compatible-with=9)
+```
+
+이 오류는 Python 클라이언트가 Elasticsearch 서버와 맞지 않는 버전으로 요청을 보내기 때문에 생긴다.
+이는 클라이언트가 Elasticsearch 서버에 버전 9로 요청한다고 했지만,
+서버는 8까지밖에 못 받는다고 응답하면서 생긴 오류다.
+
+
+### 💡 해결법 : 클라이언트 다운그레이드
+
+서버와 클라이언트의 버전을 맞춰주면 해결된다.
+
+```bash
+pip uninstall elasticsearch
+pip install "elasticsearch>=8,<9"  # 8.x 버전으로 재설치
+```
+
 ### Elasticsearch 인덱스 생성
 
 데이터 수집 및 전처리는 별도 Jupyter Notebook(`eda.ipynb`)에서 EDA와 `folium`을 활용한 지도 시각화를 통해  
