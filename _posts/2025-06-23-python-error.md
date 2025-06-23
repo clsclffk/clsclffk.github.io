@@ -1,12 +1,15 @@
 ---
 title: 데이터 파이프라인에서 자주 발생하는 Python 모듈 경로 에러 해결법
 author: jisu
-date: 2025-06-23
+date: 2025-06-23 13:30:00 +0900
 categories: [Python, Data Engineering]
 tags: [PYTHONPATH, sys.path]
 pin: false
+math: false
+mermaid: false
+comments: true
 ---
- 
+
 데이터 파이프라인 구성 중,  
 `from etl.load_to_postgres import foo` 같은 코드를 작성했는데 아래와 같은 오류가 발생했다:
 
