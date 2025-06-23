@@ -26,14 +26,13 @@ ModuleNotFoundError: No module named 'etl'
 project/
 ├── src/
 │   ├── etl/
-│   │   └── load_data.py      
+│   │   └── load_to_postgres.py   
 │   ├── api/
-│   │   └── run_script.py      
-│   └── run_etl.py           
-└── .env
+│   │   └── fetch_places.py   
+│   └── run_etl.py
 ```
 
-나는 `src/api/run_script.py` 안에서 아래와 같이 import를 시도했는데,
+나는 `src/api/fetch_places.py` 안에서 아래와 같이 import를 시도했는데,
 
 ```python
 from etl.load_to_postgres import foo
@@ -90,7 +89,7 @@ from etl.load_to_postgres import foo
 여러 스크립트를 연속 실행하거나, 루트에서 실행할 때는 `PYTHONPATH` 환경변수를 설정하는 게 더 깔끔하다.
 
 ```bash
-PYTHONPATH=./src python src/api/run_script.py
+PYTHONPATH=./src python src/api/fetch_places.py
 ```
 
 이렇게 하면 Python은 `src/` 디렉토리를 모듈 탐색 경로로 인식한다.
@@ -106,7 +105,7 @@ import os
 env = os.environ.copy()
 env["PYTHONPATH"] = "./src"
 
-subprocess.run(["python", "src/api/run_script.py"], env=env)
+subprocess.run(["python", "src/api/fetch_places.py"], env=env)
 ```
 
 이렇게 하면 `run_etl.py`가 각 하위 모듈을 실행할 때도 모듈 경로 문제가 발생하지 않는다.
