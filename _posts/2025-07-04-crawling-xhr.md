@@ -35,7 +35,8 @@ POST https://dayforyou.com/searchContent
 
 Payload 탭을 확인해보면 아래와 같은 파라미터가 함께 전송된 걸 확인할 수 있었다.
 
-![image](https://github.com/user-attachments/assets/e7c13b02-0841-435e-a10b-37a45efe44c8)
+![image](https://github.com/user-attachments/assets/dc899bf7-e7f4-43f7-9950-2edcd4e9501e)
+
 
 ```json
 {
