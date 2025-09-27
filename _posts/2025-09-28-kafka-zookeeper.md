@@ -62,12 +62,12 @@ Kafka와 Zookeeper가 동일한 Cluster ID로 다시 합의하게 되면서 문�
 구체적으로는 다음과 같은 방법을 따라야 한다:
 
 1. Zookeeper의 Cluster ID 확인
-   Zookeeper는 `/cluster/id` 노드에 현재 클러스터의 ID를 저장한다.  
-   아래 명령어로 확인할 수 있다:
-   
-   ```bash
-   zookeeper-shell.sh localhost:2181 get /cluster/id
-   ```
+Zookeeper는 `/cluster/id` 노드에 현재 클러스터의 ID를 저장한다.  
+아래 명령어로 확인할 수 있다:
+ 
+ ```bash
+ zookeeper-shell.sh localhost:2181 get /cluster/id
+ ```
 
 2. 브로커의 `meta.properties` 확인
 각 브로커 데이터 디렉터리 안에는 meta.properties 파일이 있고, 이곳에 브로커가 속한 Cluster ID가 기록돼 있다:
