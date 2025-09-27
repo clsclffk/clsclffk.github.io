@@ -17,7 +17,7 @@ ETL 파이프라인과 스트리밍 처리를 위해 Kafka를 Docker Compose로 
 
 ```text
 kafka.common.InconsistentClusterIdException: 
-The Cluster ID pkA9x4sSQq-10YdUhhnDmg doesn't match stored clusterId Some(bhDEQQoFTnuI30snvU-CKg) in meta.properties. 
+The Cluster ID XXX-XXX doesn't match stored clusterId Some(XXX-XXX) in meta.properties. 
 The broker is trying to join the wrong cluster. Configured zookeeper.connect may be wrong.
 ```
 
@@ -41,7 +41,8 @@ Kafka 클러스터는 각자 고유한 Cluster ID를 가진다.
 --
 
 ## 해결 방법
-1. 개발 환경 (간단하게 초기화)
+
+### 1. 개발 환경 (간단하게 초기화)
 테스트 환경이라면 데이터를 잃어버려도 큰 문제가 되지 않는다.  
 따라서 가장 간단한 해결책은 아예 볼륨을 삭제하고 새로 시작하는 것이다:
 
@@ -53,14 +54,14 @@ docker compose up -d
 `-v` 옵션으로 볼륨까지 삭제하면, 브로커의 `meta.properties`와 Zookeeper 데이터가 모두 초기화된다.
 Kafka와 Zookeeper가 동일한 Cluster ID로 다시 합의하게 되면서 문제가 해결된다.
 
-2. 운영 환경
+### 2. 운영 환경
 운영 환경에서는 단순히 `-v` 옵션으로 볼륨을 날려버리면 안 된다.  
 그렇게 하면 브로커 데이터와 토픽 로그가 전부 사라져 클러스터 전체가 무너질 수 있기 때문이다.  
 운영 환경에서 핵심은 **Cluster ID를 일관성 있게 유지하는 것**이다.
 
 구체적으로는 다음과 같은 방법을 따라야 한다:
 
-1. **Zookeeper의 Cluster ID 확인**  
+1. Zookeeper의 Cluster ID 확인
    Zookeeper는 `/cluster/id` 노드에 현재 클러스터의 ID를 저장한다.  
    아래 명령어로 확인할 수 있다:
    
@@ -68,18 +69,18 @@ Kafka와 Zookeeper가 동일한 Cluster ID로 다시 합의하게 되면서 문�
    zookeeper-shell.sh localhost:2181 get /cluster/id
    ```
 
-2. **브로커의 `meta.properties` 확인**
+2. 브로커의 `meta.properties` 확인
 각 브로커 데이터 디렉터리 안에는 meta.properties 파일이 있고, 이곳에 브로커가 속한 Cluster ID가 기록돼 있다:
 
 ```
-cluster.id=bhDEQQoFTnuI30snvU-CKg
+cluster.id=XXX
 broker.id=1
 ```
 
 이 값이 반드시 Zookeeper에 기록된 값과 같아야 한다.
 따라서 데이터를 보존해야 한다면, Zookeeper에 저장된 Cluster ID 기준으로 각 브로커의 `meta.properties`를 수정해야한다.
 
-3. **새 브로커 추가 시 Cluster ID 고정하기**  
+3. 새 브로커 추가 시 Cluster ID 고정하기 
 운영 환경에서는 브로커를 새로 추가할 때도 주의가 필요하다.  
 브로커가 새로 띄워지면서 임의의 Cluster ID를 생성하면,  
 이미 운영 중인 클러스터와 충돌이 발생할 수 있기 때문이다.  
