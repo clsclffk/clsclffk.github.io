@@ -1,5 +1,5 @@
 ---
-title: Kafka Docker 환경에서 Spark Streaming 연결 오류: Failed to create new KafkaAdminClient 해결하기
+title: "Kafka Docker 환경에서 Spark Streaming 연결 오류: Failed to create new KafkaAdminClient 해결하기"
 author: jisu
 date: 2025-09-29 12:00:00 +0900
 categories: [Data Engineering]
