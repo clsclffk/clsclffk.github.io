@@ -222,6 +222,11 @@ jekyll-archives:
   layouts:
     category: category
     tag: tag
+    
   permalinks:
     tag: /tags/:name/
     category: /categories/:name/
+
+htmlproofer:
+  disable_external: true
+
