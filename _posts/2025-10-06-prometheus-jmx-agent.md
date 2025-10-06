@@ -1,5 +1,5 @@
 ---
-title: Prometheus에서 Kafka·Spark 모니터링 설정 및 에러 해결기
+title: "Prometheus에서 Kafka와 Spark 모니터링 설정 및 에러 해결기"
 author: jisu
 date: 2025-10-06 21:00:00 +0900
 categories: [Data Engineering]
