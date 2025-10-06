@@ -224,4 +224,4 @@ Prometheus에서 안정적으로 메트릭을 수집할 수 있게 되었다.
 
 아래는 Prometheus에서 **Kafka와 Spark 타겟이 모두 정상(UP)** 상태로 표시된 화면이다.
 
-![Prometheus Target Health](<img width="2559" height="1336" alt="image (2)" src="https://github.com/user-attachments/assets/b5a2e963-b5cc-44ba-ac41-bde317635ad6" />)
+![Prometheus Target Health](/assets/img/posts/prometheus-kafka-spark-up.png)
